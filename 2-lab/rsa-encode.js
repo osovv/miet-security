@@ -1,14 +1,21 @@
 const io = require("./io");
-const base64 = require("./base64");
 const constants = require("./constants");
 const { parseKey } = require("./rsa-keygen");
 
-const [_, DEFAULT_MESSAGE] = io.read(constants.ORIGINAL_MESSAGE_PATH);
-const [__, DEFAULT_PUBLIC_KEY] = io.read(constants.PUBLIC_KEY_PATH);
+const defaultMessage = () => {
+  [_, msg] = io.read(constants.ORIGINAL_MESSAGE_PATH);
+  return msg;
+};
+const defaultPublicKey = () => {
+  const [__, key] = io.read(constants.PUBLIC_KEY_PATH);
+  return key;
+};
 
-const encode = (message = DEFAULT_MESSAGE, publicKey = DEFAULT_PUBLIC_KEY) => {
-  const [e, n] = parseKey(publicKey);
-  const msg = [...message.toUpperCase()]
+const encode = (msg, publicKey) => {
+  const message = msg || defaultMessage();
+  const key = publicKey || defaultPublicKey();
+  const [e, n] = parseKey(key);
+  const result = [...message.toUpperCase()]
     .map((char) => {
       const charCode = char.charCodeAt();
       const pow = Math.pow(charCode, e);
@@ -16,9 +23,10 @@ const encode = (message = DEFAULT_MESSAGE, publicKey = DEFAULT_PUBLIC_KEY) => {
       return mod;
     })
     .join();
-  io.write(constants.ENCODED_MESSAGE_PATH, msg);
-  return msg;
+  io.write(constants.ENCODED_MESSAGE_PATH, result);
+  return result;
 };
 
-let encodedMessage = encode();
-console.log(encodedMessage);
+module.exports = {
+  encode,
+};

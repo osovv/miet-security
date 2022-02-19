@@ -20,9 +20,15 @@ const keygen = (p, q, e) => {
 
   const d = calculateD(phi, e);
 
+  const publicKey = base64.encode([e, n].toString());
+  const privateKey = base64.encode([d, n].toString());
+
+  io.write(constants.PUBLIC_KEY_PATH, publicKey);
+  io.write(constants.PRIVATE_KEY_PATH, privateKey);
+
   return {
-    publicKey: base64.encode([e, n].toString()),
-    privateKey: base64.encode([d, n].toString()),
+    publicKey: publicKey,
+    privateKey: privateKey,
   };
 };
 
@@ -34,15 +40,7 @@ const parseKey = (encodedKey) => {
   return key;
 };
 
-const q = 7;
-const p = 13;
-const e = 5;
-
-const keys = keygen(p, q, e);
-
-io.write(constants.PUBLIC_KEY_PATH, keys.publicKey);
-io.write(constants.PRIVATE_KEY_PATH, keys.privateKey);
-
 module.exports = {
+  keygen,
   parseKey,
 };
